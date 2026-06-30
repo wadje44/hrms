@@ -1,0 +1,14 @@
+region           = "ap-south-1"
+name             = "hrms-prod"
+site_bucket_name = "prabha-hrms-prod-web-CHANGEME"
+github_repo      = "wadje44/hrms"
+image_tag        = "latest"
+desired_count    = 2
+
+# Optional custom domain + HTTPS:
+# alb_certificate_arn        = "arn:aws:acm:ap-south-1:...:certificate/..."
+# cloudfront_certificate_arn = "arn:aws:acm:us-east-1:...:certificate/..."
+# frontend_aliases           = ["hrms.example.com"]
+
+# If the dev stack already created the GitHub OIDC provider in this account:
+create_oidc_provider = false

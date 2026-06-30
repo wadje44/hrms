@@ -1,0 +1,9 @@
+region           = "ap-south-1"
+name             = "hrms-dev"
+site_bucket_name = "prabha-hrms-dev-web-CHANGEME" # must be globally unique
+github_repo      = "wadje44/hrms"
+image_tag        = "latest"
+desired_count    = 1
+
+# If your AWS account already has a GitHub OIDC provider, set this to false:
+# create_oidc_provider = false
