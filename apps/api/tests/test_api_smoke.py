@@ -13,6 +13,14 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _seed_db():
+    """Seed employees before the DB-backed tests (idempotent)."""
+    from app.seed import seed
+
+    seed()
+
+
 @pytest.fixture(scope="module")
 def client():
     from app.main import app

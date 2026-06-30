@@ -28,6 +28,8 @@ env:
 
 jobs:
   plan:
+    # Skip cleanly until infra-via-CI is configured (we apply locally otherwise).
+    if: ${{ vars.AWS_TERRAFORM_ROLE_ARN != '' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -54,7 +56,7 @@ jobs:
 
   apply:
     needs: plan
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: ${{ vars.AWS_TERRAFORM_ROLE_ARN != '' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     environment: infra-dev
     defaults:
