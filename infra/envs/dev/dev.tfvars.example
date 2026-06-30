@@ -1,9 +1,14 @@
+# All account-specific values live here. To deploy to a different AWS account,
+# copy this file (e.g. dev.myaccount.tfvars), change aws_profile + site_bucket_name,
+# point the backend at that account's state bucket, and apply. Nothing else changes.
+aws_profile      = "hrms-personal" # AWS CLI profile = which account to deploy to
 region           = "ap-south-1"
 name             = "hrms-dev"
 site_bucket_name = "prabha-hrms-dev-web-CHANGEME" # must be globally unique
 github_repo      = "wadje44/hrms"
 image_tag        = "latest"
 desired_count    = 1
+cheap_mode       = true
 
 # If your AWS account already has a GitHub OIDC provider, set this to false:
 # create_oidc_provider = false

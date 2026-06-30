@@ -3,6 +3,12 @@ variable "region" {
   default = "ap-south-1"
 }
 
+variable "aws_profile" {
+  type        = string
+  default     = ""
+  description = "AWS CLI profile to deploy with. Empty = use ambient credentials/AWS_PROFILE. Set per account to switch targets."
+}
+
 variable "name" {
   type    = string
   default = "hrms-dev"

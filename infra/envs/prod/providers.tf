@@ -1,5 +1,6 @@
 provider "aws" {
-  region = var.region
+  region  = var.region
+  profile = var.aws_profile != "" ? var.aws_profile : null
   default_tags {
     tags = {
       Project = "prabha-hrms"
@@ -11,8 +12,9 @@ provider "aws" {
 
 # CloudFront ACM certificates must live in us-east-1.
 provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
+  alias   = "us_east_1"
+  region  = "us-east-1"
+  profile = var.aws_profile != "" ? var.aws_profile : null
   default_tags {
     tags = {
       Project = "prabha-hrms"

@@ -1,0 +1,7 @@
+# Per-account remote state config. Copy to backend.hcl, fill in, then:
+#   terraform init -backend-config=backend.hcl
+bucket         = "my-hrms-tfstate-CHANGEME"
+key            = "prod/terraform.tfstate"
+region         = "ap-south-1"
+dynamodb_table = "hrms-tf-locks"
+encrypt        = true

@@ -1,0 +1,8 @@
+# Per-account remote state config. Copy to backend.hcl, fill in, then:
+#   terraform init -backend-config=backend.hcl
+# To switch accounts, point these at the new account's state bucket/table.
+bucket         = "my-hrms-tfstate-CHANGEME"
+key            = "dev/terraform.tfstate"
+region         = "ap-south-1"
+dynamodb_table = "hrms-tf-locks"
+encrypt        = true
