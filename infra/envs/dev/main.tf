@@ -134,4 +134,7 @@ module "iam_oidc" {
   ecr_repository_arn   = module.ecr.repository_arn
   site_bucket_arn      = "arn:aws:s3:::${var.site_bucket_name}"
   pass_role_arns       = [module.ecs.execution_role_arn, module.ecs.task_role_arn]
+  # deploy.yml jobs use `environment: production`, which makes GitHub's OIDC
+  # token sub `repo:OWNER/REPO:environment:production` (not the branch ref).
+  github_refs = ["ref:refs/heads/main", "environment:production"]
 }
