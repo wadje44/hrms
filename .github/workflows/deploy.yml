@@ -66,9 +66,11 @@ jobs:
             --query 'services[0].networkConfiguration.awsvpcConfiguration' --output json)
           SUBNETS=$(echo "$NET" | jq -r '.subnets | join(",")')
           SGS=$(echo "$NET" | jq -r '.securityGroups | join(",")')
+          # Match the service's public-IP setting (cheap mode runs in public subnets).
+          PUBLIC=$(echo "$NET" | jq -r '.assignPublicIp // "DISABLED"')
           TASK_ARN=$(aws ecs run-task --cluster "${{ vars.ECS_CLUSTER }}" \
             --task-definition "$NEW_ARN" --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SGS],assignPublicIp=DISABLED}" \
+            --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SGS],assignPublicIp=$PUBLIC}" \
             --overrides '{"containerOverrides":[{"name":"api","command":["alembic","upgrade","head"]}]}' \
             --query 'tasks[0].taskArn' --output text)
           echo "Migration task: $TASK_ARN"

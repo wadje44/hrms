@@ -11,7 +11,8 @@ module "network" {
   source         = "../../modules/network"
   name           = var.name
   azs            = local.azs
-  one_nat_per_az = false # single NAT keeps dev cheap
+  one_nat_per_az = false
+  enable_nat     = !var.cheap_mode # cheap mode skips the ~$32/mo NAT gateway
 }
 
 # ---- Container registry ----
@@ -92,7 +93,8 @@ module "ecs" {
   source                    = "../../modules/ecs"
   name                      = var.name
   vpc_id                    = module.network.vpc_id
-  subnet_ids                = module.network.private_subnet_ids
+  subnet_ids                = var.cheap_mode ? module.network.public_subnet_ids : module.network.private_subnet_ids
+  assign_public_ip          = var.cheap_mode
   service_security_group_id = aws_security_group.app.id
   target_group_arn          = module.alb.target_group_arn
   image                     = "${module.ecr.repository_url}:${var.image_tag}"

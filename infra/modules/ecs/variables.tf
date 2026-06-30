@@ -32,6 +32,12 @@ variable "desired_count" {
   default = 1
 }
 
+variable "assign_public_ip" {
+  type        = bool
+  default     = false
+  description = "Give tasks a public IP (cheap mode: run in public subnets, no NAT needed). Ingress still restricted to the ALB SG."
+}
+
 variable "environment" {
   type        = list(object({ name = string, value = string }))
   default     = []

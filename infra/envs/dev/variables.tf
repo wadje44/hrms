@@ -34,3 +34,9 @@ variable "desired_count" {
   type    = number
   default = 1
 }
+
+variable "cheap_mode" {
+  type        = bool
+  default     = true
+  description = "Cost-optimized demo mode: no NAT gateway, run the API task in public subnets behind the ALB security group. Saves ~$32/mo. Set false for a NAT-isolated setup."
+}

@@ -54,14 +54,18 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
+locals {
+  nat_count = var.enable_nat ? (var.one_nat_per_az ? length(var.azs) : 1) : 0
+}
+
 resource "aws_eip" "nat" {
-  count  = var.one_nat_per_az ? length(var.azs) : 1
+  count  = local.nat_count
   domain = "vpc"
   tags   = merge(var.tags, { Name = "${var.name}-nat-eip-${count.index}" })
 }
 
 resource "aws_nat_gateway" "this" {
-  count         = var.one_nat_per_az ? length(var.azs) : 1
+  count         = local.nat_count
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index].id
   tags          = merge(var.tags, { Name = "${var.name}-nat-${count.index}" })
@@ -71,11 +75,16 @@ resource "aws_nat_gateway" "this" {
 resource "aws_route_table" "private" {
   count  = length(var.azs)
   vpc_id = aws_vpc.this.id
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = var.one_nat_per_az ? aws_nat_gateway.this[count.index].id : aws_nat_gateway.this[0].id
-  }
-  tags = merge(var.tags, { Name = "${var.name}-private-rt-${count.index}" })
+  tags   = merge(var.tags, { Name = "${var.name}-private-rt-${count.index}" })
+}
+
+# Default route via NAT only when NAT is enabled. With NAT disabled (cheap mode)
+# private subnets have no internet route — fine for RDS, which needs no egress.
+resource "aws_route" "private_nat" {
+  count                  = var.enable_nat ? length(var.azs) : 0
+  route_table_id         = aws_route_table.private[count.index].id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = var.one_nat_per_az ? aws_nat_gateway.this[count.index].id : aws_nat_gateway.this[0].id
 }
 
 resource "aws_route_table_association" "private" {
