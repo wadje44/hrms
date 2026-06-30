@@ -41,6 +41,23 @@ resource "aws_cloudfront_distribution" "site" {
     origin_access_control_id = aws_cloudfront_origin_access_control.site.id
   }
 
+  # Optional API origin: lets CloudFront serve the API over HTTPS at /api/*
+  # (avoids mixed-content from the HTTPS SPA when the ALB itself is HTTP-only,
+  # and makes API calls same-origin so no CORS is needed).
+  dynamic "origin" {
+    for_each = var.api_origin_domain == "" ? [] : [1]
+    content {
+      domain_name = var.api_origin_domain
+      origin_id   = "api-alb"
+      custom_origin_config {
+        http_port              = 80
+        https_port             = 443
+        origin_protocol_policy = "http-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
+    }
+  }
+
   default_cache_behavior {
     target_origin_id       = "s3-site"
     viewer_protocol_policy = "redirect-to-https"
@@ -52,6 +69,29 @@ resource "aws_cloudfront_distribution" "site" {
       query_string = false
       cookies {
         forward = "none"
+      }
+    }
+  }
+
+  # API passthrough: forward /api/* to the ALB, no caching, preserve auth.
+  dynamic "ordered_cache_behavior" {
+    for_each = var.api_origin_domain == "" ? [] : [1]
+    content {
+      path_pattern           = "/api/*"
+      target_origin_id       = "api-alb"
+      viewer_protocol_policy = "https-only"
+      allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+      cached_methods         = ["GET", "HEAD"]
+      min_ttl                = 0
+      default_ttl            = 0
+      max_ttl                = 0
+
+      forwarded_values {
+        query_string = true
+        headers      = ["Authorization", "Content-Type", "Origin"]
+        cookies {
+          forward = "none"
+        }
       }
     }
   }

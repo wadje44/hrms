@@ -24,6 +24,12 @@ variable "acm_certificate_arn" {
   description = "ACM cert (us-east-1) for a custom domain. Empty = CloudFront default cert."
 }
 
+variable "api_origin_domain" {
+  type        = string
+  default     = ""
+  description = "ALB DNS name to expose at /api/* over HTTPS via CloudFront. Empty = no API passthrough."
+}
+
 variable "tags" {
   type    = map(string)
   default = {}

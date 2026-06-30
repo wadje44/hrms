@@ -120,8 +120,9 @@ module "ecs" {
 
 # ---- Frontend hosting ----
 module "frontend" {
-  source      = "../../modules/frontend"
-  bucket_name = var.site_bucket_name
+  source            = "../../modules/frontend"
+  bucket_name       = var.site_bucket_name
+  api_origin_domain = module.alb.dns_name # serve the API at /api/* over HTTPS
 }
 
 # ---- CI deploy role (GitHub OIDC) ----
