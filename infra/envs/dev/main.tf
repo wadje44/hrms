@@ -62,12 +62,13 @@ module "alb" {
 
 # ---- Database ----
 module "rds" {
-  source                = "../../modules/rds"
-  name                  = var.name
-  vpc_id                = module.network.vpc_id
-  private_subnet_ids    = module.network.private_subnet_ids
-  app_security_group_id = aws_security_group.app.id
-  db_password           = module.secrets.db_password
+  source                  = "../../modules/rds"
+  name                    = var.name
+  vpc_id                  = module.network.vpc_id
+  private_subnet_ids      = module.network.private_subnet_ids
+  app_security_group_id   = aws_security_group.app.id
+  db_password             = module.secrets.db_password
+  backup_retention_period = 7 # daily automated backups + 7-day point-in-time recovery
 }
 
 # ---- DATABASE_URL secret (built from RDS endpoint + DB password) ----
