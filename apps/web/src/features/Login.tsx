@@ -4,6 +4,14 @@ import { api, ApiError } from "../api/client";
 import type { PublicEmployee } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 
+const DEMO_ACCOUNTS = [
+  { id: "EMP008", label: "Neelam (Admin)", pin: "1234" },
+  { id: "EMP006", label: "Tushar (Manager)", pin: "0000" },
+  { id: "EMP007", label: "Ganesh (Manager)", pin: "0000" },
+  { id: "EMP001", label: "Aarti (Employee)", pin: "0000" },
+  { id: "EMP004", label: "Kunal (Employee)", pin: "0000" },
+];
+
 export function Login() {
   const { login, user } = useAuth();
   const navigate = useNavigate();
@@ -12,6 +20,7 @@ export function Login() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
 
   useEffect(() => {
     if (user) navigate("/");
@@ -95,6 +104,59 @@ export function Login() {
         <button className="accent" type="submit" disabled={busy} style={{ width: "100%", marginTop: 14 }}>
           {busy ? "Signing in…" : "Sign in"}
         </button>
+
+        <button
+          type="button"
+          onClick={() => setShowDemo((v) => !v)}
+          style={{
+            width: "100%",
+            marginTop: 10,
+            background: "none",
+            border: "1px solid var(--border)",
+            borderRadius: 6,
+            padding: "6px 0",
+            cursor: "pointer",
+            color: "var(--muted)",
+            fontSize: 13,
+          }}
+        >
+          {showDemo ? "Hide" : "Show"} demo accounts
+        </button>
+
+        {showDemo && (
+          <div style={{ marginTop: 10 }}>
+            {DEMO_ACCOUNTS.map((acc) => (
+              <button
+                key={acc.id}
+                type="button"
+                onClick={() => {
+                  setEmployeeId(acc.id);
+                  setPin(acc.pin);
+                }}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  width: "100%",
+                  padding: "6px 10px",
+                  marginBottom: 4,
+                  background: employeeId === acc.id ? "var(--orange)" : "var(--surface)",
+                  color: employeeId === acc.id ? "#fff" : "inherit",
+                  border: "1px solid var(--border)",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontSize: 13,
+                  textAlign: "left",
+                }}
+              >
+                <span>{acc.label}</span>
+                <span style={{ fontFamily: "monospace", opacity: 0.7 }}>
+                  {acc.id} · PIN {acc.pin}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </form>
     </div>
   );
