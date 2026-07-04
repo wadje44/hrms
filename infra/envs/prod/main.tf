@@ -67,6 +67,7 @@ module "rds" {
   backup_retention_period = 7
   deletion_protection     = true
   skip_final_snapshot     = false
+  snapshot_identifier     = var.db_snapshot_identifier
 }
 
 resource "aws_secretsmanager_secret" "database_url" {
