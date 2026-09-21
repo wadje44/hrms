@@ -58,9 +58,18 @@ def compute_payslip(inp: PayrollInput) -> dict:
     rate = resolve_hourly_rate(inp)
 
     paid_leave_hours = inp.paid_leave_days * inp.working_hours_per_day
+    absent_deduct_hours = inp.absent_days * inp.working_hours_per_day
+    ul_deduct_hours = inp.ul_days * inp.working_hours_per_day
     late_deduct_hours = late_deduction_hours(inp.late_marks, inp.free_late_marks)
 
-    paid_hours = max(0.0, inp.worked_hours + paid_leave_hours - late_deduct_hours)
+    paid_hours = max(
+        0.0,
+        inp.worked_hours
+        + paid_leave_hours
+        - absent_deduct_hours
+        - ul_deduct_hours
+        - late_deduct_hours,
+    )
 
     gross = round(rate * paid_hours, 2)
     fixed_total = round(sum(float(c.get("amount", 0)) for c in inp.fixed_components), 2)
@@ -81,6 +90,8 @@ def compute_payslip(inp: PayrollInput) -> dict:
         "leave_breakdown": inp.leave_breakdown,
         "worked_hours": round(inp.worked_hours, 2),
         "paid_leave_hours": round(paid_leave_hours, 2),
+        "absent_deduction_hours": round(absent_deduct_hours, 2),
+        "ul_deduction_hours": round(ul_deduct_hours, 2),
         "late_marks": inp.late_marks,
         "late_mark_deduction_hours": round(late_deduct_hours, 2),
         "paid_hours": round(paid_hours, 2),

@@ -91,6 +91,19 @@ export interface LeaveRequest {
   created_at: string;
 }
 
+export interface WfhRequest {
+  id: number;
+  employee_id: string;
+  date_from: string;
+  date_to: string;
+  reason: string;
+  status: string;
+  reviewed_by: string | null;
+  review_date: string | null;
+  comment: string;
+  created_at: string;
+}
+
 export interface LeaveBalance {
   leave_type: LeaveType;
   balance: number;
@@ -115,6 +128,12 @@ export interface PayrollSummaryRow {
   gross: number;
   deductions_total: number;
   net: number;
+}
+
+export interface YtdEarningsRow {
+  employee_id: string;
+  full_name: string;
+  ytd_earnings: number;
 }
 
 export interface EmployeeRef {
