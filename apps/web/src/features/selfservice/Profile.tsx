@@ -53,6 +53,10 @@ export function Profile() {
               <td>{me.category}</td>
             </tr>
             <tr>
+              <td>WFH limit / month</td>
+              <td>{me.wfh_limit} days</td>
+            </tr>
+            <tr>
               <td>Designation</td>
               <td>{me.designation}</td>
             </tr>
