@@ -33,7 +33,6 @@ def count_approved_days(requests, month_anchor: date) -> int:
 def can_approve(existing_requests, date_from: date, date_to: date, monthly_limit: int) -> bool:
     if monthly_limit <= 0:
         return False
-    requested = _days_inclusive(date_from, date_to)
     months = set()
     cur = date_from
     while cur <= date_to:
@@ -52,7 +51,14 @@ def can_approve(existing_requests, date_from: date, date_to: date, monthly_limit
     return True
 
 
-def assert_approval_allowed(db, employee_id: str, date_from: date, date_to: date, limit: int, model):
+def assert_approval_allowed(
+    db,
+    employee_id: str,
+    date_from: date,
+    date_to: date,
+    limit: int,
+    model,
+):
     existing = (
         db.query(model)
         .filter(

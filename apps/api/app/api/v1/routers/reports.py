@@ -26,7 +26,12 @@ def monthly_report(
         db.query(AttendanceDay)
         .filter(
             AttendanceDay.date >= datetime(year, mon, 1).date(),
-            AttendanceDay.date < datetime(year if mon < 12 else year + 1, mon + 1 if mon < 12 else 1, 1).date(),
+            AttendanceDay.date
+            < datetime(
+                year if mon < 12 else year + 1,
+                mon + 1 if mon < 12 else 1,
+                1,
+            ).date(),
         )
         .all()
     )
@@ -80,7 +85,15 @@ def ytd_earnings_aggregate(
     )
     totals = build_ytd_earnings(
         [
-            type("Row", (), {"employee_id": emp.id, "full_name": emp.full_name, "net": float(rec.net)})()
+            type(
+                "Row",
+                (),
+                {
+                    "employee_id": emp.id,
+                    "full_name": emp.full_name,
+                    "net": float(rec.net),
+                },
+            )()
             for rec, emp in rows
         ]
     )

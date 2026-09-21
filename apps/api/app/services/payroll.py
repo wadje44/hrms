@@ -64,7 +64,11 @@ def compute_payslip(inp: PayrollInput) -> dict:
 
     paid_hours = max(
         0.0,
-        inp.worked_hours + paid_leave_hours - absent_deduct_hours - ul_deduct_hours - late_deduct_hours,
+        inp.worked_hours
+        + paid_leave_hours
+        - absent_deduct_hours
+        - ul_deduct_hours
+        - late_deduct_hours,
     )
 
     gross = round(rate * paid_hours, 2)
