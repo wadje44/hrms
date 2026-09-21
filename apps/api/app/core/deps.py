@@ -25,11 +25,18 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> CurrentUser:
         payload = decode_access_token(token)
     except jwt.PyJWTError as exc:
         raise cred_exc from exc
+
     emp_id = payload.get("sub")
-    role = payload.get("role")
-    if not emp_id or not role:
+    role_raw = payload.get("role")
+    if not emp_id or not role_raw:
         raise cred_exc
-    return CurrentUser(employee_id=emp_id, role=Role(role))
+
+    try:
+        role = Role(role_raw)
+    except ValueError as exc:
+        raise cred_exc from exc
+
+    return CurrentUser(employee_id=emp_id, role=role)
 
 
 def require_roles(*roles: Role) -> Callable[[CurrentUser], CurrentUser]:

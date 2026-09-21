@@ -7,10 +7,13 @@ import { Employees } from "./features/Employees";
 import { Leaves } from "./features/Leaves";
 import { Login } from "./features/Login";
 import { Payroll } from "./features/Payroll";
+import { Reports } from "./features/Reports";
 import { Settings } from "./features/Settings";
+import { WFH } from "./features/WFH";
 import { MyAttendance } from "./features/selfservice/MyAttendance";
 import { MyLeaves } from "./features/selfservice/MyLeaves";
 import { MyPayslip } from "./features/selfservice/MyPayslip";
+import { MyWFH } from "./features/selfservice/MyWFH";
 import { Profile } from "./features/selfservice/Profile";
 import { Punch } from "./features/selfservice/Punch";
 
@@ -59,10 +62,26 @@ export function App() {
           }
         />
         <Route
+          path="wfh"
+          element={
+            <RequireAuth roles={["admin", "manager"]}>
+              <WFH />
+            </RequireAuth>
+          }
+        />
+        <Route
           path="payroll"
           element={
             <RequireAuth roles={["admin"]}>
               <Payroll />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="reports"
+          element={
+            <RequireAuth roles={["admin", "manager"]}>
+              <Reports />
             </RequireAuth>
           }
         />
@@ -79,6 +98,7 @@ export function App() {
         <Route path="me" element={<Punch />} />
         <Route path="my-attendance" element={<MyAttendance />} />
         <Route path="my-leaves" element={<MyLeaves />} />
+        <Route path="my-wfh" element={<MyWFH />} />
         <Route path="my-payslip" element={<MyPayslip />} />
         <Route path="profile" element={<Profile />} />
       </Route>

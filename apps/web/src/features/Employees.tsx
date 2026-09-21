@@ -26,6 +26,8 @@ export function Employees() {
   const { notify } = useToast();
   const [rows, setRows] = useState<Employee[] | null>(null);
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Employee> | null>(null);
   const [form, setForm] = useState({ ...BLANK });
 
   async function load() {
@@ -52,6 +54,36 @@ export function Employees() {
     await api.del(`/employees/${id}`);
     notify("Employee deactivated", "info");
     await load();
+  }
+
+  function startEdit(emp: Employee) {
+    setEditingId(emp.id);
+    setEditForm({
+      full_name: emp.full_name,
+      email: emp.email ?? "",
+      department: emp.department,
+      category: emp.category,
+      designation: emp.designation,
+      role: emp.role,
+      monthly_salary: emp.monthly_salary,
+      wfh_limit: emp.wfh_limit,
+      free_punch: emp.free_punch,
+      active: emp.active,
+    });
+  }
+
+  async function saveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingId || !editForm) return;
+    try {
+      await api.patch(`/employees/${editingId}`, editForm);
+      notify("Employee updated", "success");
+      setEditingId(null);
+      setEditForm(null);
+      await load();
+    } catch (err) {
+      notify(err instanceof ApiError ? err.message : "Update failed", "error");
+    }
   }
 
   if (!rows) return <Spinner label="Loading employees…" />;
@@ -91,11 +123,16 @@ export function Employees() {
                 <td>{fmtMoney(e.monthly_salary)}</td>
                 <td>{e.active ? "Active" : "Inactive"}</td>
                 <td>
-                  {e.active && (
-                    <button className="ghost" onClick={() => deactivate(e.id)}>
-                      Deactivate
+                  <div className="row" style={{ gap: 8, justifyContent: "flex-end" }}>
+                    <button className="ghost" onClick={() => startEdit(e)}>
+                      Edit
                     </button>
-                  )}
+                    {e.active && (
+                      <button className="ghost" onClick={() => deactivate(e.id)}>
+                        Deactivate
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -172,6 +209,78 @@ export function Employees() {
             />
             <button className="accent" type="submit" style={{ width: "100%", marginTop: 14 }}>
               Create
+            </button>
+          </form>
+        </Modal>
+      )}
+
+      {editingId && editForm && (
+        <Modal title="Edit Employee" onClose={() => { setEditingId(null); setEditForm(null); }}>
+          <form onSubmit={saveEdit}>
+            <label>Full name</label>
+            <input
+              value={editForm.full_name ?? ""}
+              onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+              required
+            />
+            <label>Email</label>
+            <input
+              type="email"
+              value={editForm.email ?? ""}
+              onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+            />
+            <label>Department</label>
+            <input
+              value={editForm.department ?? ""}
+              onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
+              required
+            />
+            <label>Category</label>
+            <select
+              value={editForm.category ?? "office"}
+              onChange={(e) => setEditForm({ ...editForm, category: e.target.value as Category })}
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+            <label>Designation</label>
+            <input
+              value={editForm.designation ?? ""}
+              onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
+            />
+            <label>Role</label>
+            <select
+              value={editForm.role ?? "employee"}
+              onChange={(e) => setEditForm({ ...editForm, role: e.target.value as Role })}
+            >
+              {ROLES.map((r) => (
+                <option key={r}>{r}</option>
+              ))}
+            </select>
+            <label>Monthly salary</label>
+            <input
+              type="number"
+              value={editForm.monthly_salary ?? 0}
+              onChange={(e) => setEditForm({ ...editForm, monthly_salary: Number(e.target.value) })}
+            />
+            <label>WFH limit (per month)</label>
+            <input
+              type="number"
+              value={editForm.wfh_limit ?? 0}
+              onChange={(e) => setEditForm({ ...editForm, wfh_limit: Number(e.target.value) })}
+            />
+            <label>
+              <input
+                type="checkbox"
+                checked={Boolean(editForm.free_punch)}
+                onChange={(e) => setEditForm({ ...editForm, free_punch: e.target.checked })}
+                style={{ width: "auto", minHeight: 0, marginRight: 8 }}
+              />
+              Free punch (bypass GPS)
+            </label>
+            <button className="accent" type="submit" style={{ width: "100%", marginTop: 14 }}>
+              Save changes
             </button>
           </form>
         </Modal>
