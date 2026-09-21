@@ -26,7 +26,7 @@ EMPLOYEES = [
     ("EMP007", "Ganesh Mahale", "Warehouse", Category.FIELD, "Warehouse Manager", Role.MANAGER, 72000, 0, False),
     ("EMP008", "Neelam Nikam", "Office", Category.OFFICE, "Accounts Manager", Role.ADMIN, 120000, 0, False),
     ("EMP009", "Devika Gaikwad", "Office", Category.OFFICE, "Sales Executive", Role.EMPLOYEE, 38000, 0, False),
-    ("EMP010", "Ummehani Patanwala", "Office", Category.OFFICE, "Accounts Executive", Role.EMPLOYEE, 42000, 0, False),
+    ("EMP010", "Ummehani Patanwala", "Warehouse", Category.FIELD, "Accounts Executive", Role.EMPLOYEE, 42000, 0, False),
     ("EMP011", "Eshwari Aher", "Office", Category.OFFICE, "Accounts Executive", Role.EMPLOYEE, 41000, 0, False),
     ("EMP012", "Simran Asija", "Office", Category.OFFICE, "Accounts Executive", Role.EMPLOYEE, 41000, 0, False),
     ("EMP013", "Raj Fadwale", "Warehouse", Category.FIELD, "Warehouse Associate", Role.EMPLOYEE, 35000, 0, False),
@@ -59,37 +59,63 @@ DEFAULT_BALANCES = {"EL": 18, "ML": 12, "FL": 8, "DL": 6, "DL2": 4}
 def seed() -> None:
     db = SessionLocal()
     try:
-        if db.query(Employee).count() > 0:
-            print("Employees already present — skipping seed.")
-            return
+        created = 0
+        updated = 0
 
         for eid, name, dept, cat, desig, role, salary, wfh, free in EMPLOYEES:
             pin = "1234" if eid == "EMP008" else DEFAULT_PIN
-            emp = Employee(
-                id=eid,
-                full_name=name,
-                email=f"{eid.lower()}@prabha.example",
-                department=dept,
-                category=cat,
-                designation=desig,
-                role=role,
-                monthly_salary=salary,
-                wfh_limit=wfh,
-                free_punch=free,
-                fixed_components=[{"name": "HRA", "amount": round(salary * 0.1, 2)}],
-                deductions=[{"name": "PF", "amount": round(salary * 0.04, 2)}],
-                pin_hash=hash_pin(pin),
-            )
-            db.add(emp)
+            emp = db.get(Employee, eid)
+            if emp is None:
+                emp = Employee(
+                    id=eid,
+                    full_name=name,
+                    email=f"{eid.lower()}@prabha.example",
+                    department=dept,
+                    category=cat,
+                    designation=desig,
+                    role=role,
+                    monthly_salary=salary,
+                    wfh_limit=wfh,
+                    free_punch=free,
+                    fixed_components=[{"name": "HRA", "amount": round(salary * 0.1, 2)}],
+                    deductions=[{"name": "PF", "amount": round(salary * 0.04, 2)}],
+                    pin_hash=hash_pin(pin),
+                )
+                db.add(emp)
+                created += 1
+            else:
+                emp.full_name = name
+                emp.email = f"{eid.lower()}@prabha.example"
+                emp.department = dept
+                emp.category = cat
+                emp.designation = desig
+                emp.role = role
+                emp.monthly_salary = salary
+                emp.wfh_limit = wfh
+                emp.free_punch = free
+                emp.fixed_components = [{"name": "HRA", "amount": round(salary * 0.1, 2)}]
+                emp.deductions = [{"name": "PF", "amount": round(salary * 0.04, 2)}]
+                emp.pin_hash = hash_pin(pin)
+                updated += 1
+
+            existing_balance_rows = {
+                row.leave_type: row for row in db.query(LeaveBalance).filter_by(employee_id=eid).all()
+            }
             for lt in BALANCE_LEAVE_TYPES:
-                db.add(LeaveBalance(employee_id=eid, leave_type=lt, balance=DEFAULT_BALANCES[lt]))
+                if lt not in existing_balance_rows:
+                    db.add(LeaveBalance(employee_id=eid, leave_type=lt, balance=DEFAULT_BALANCES[lt]))
+                else:
+                    existing_balance_rows[lt].balance = DEFAULT_BALANCES[lt]
 
         # Office location (example: Mumbai) and default radius.
         s = get_settings(db)
         s.office_lat = 19.0760
         s.office_lng = 72.8777
         db.commit()
-        print(f"Seeded {len(EMPLOYEES)} employees. Admin: EMP008 / PIN 1234")
+        print(
+            f"Seeded {created} employees and refreshed {updated} employees. "
+            "Admin: EMP008 / PIN 1234"
+        )
     finally:
         db.close()
 
