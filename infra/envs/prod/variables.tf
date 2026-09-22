@@ -54,3 +54,9 @@ variable "frontend_aliases" {
   type    = list(string)
   default = []
 }
+
+variable "db_snapshot_identifier" {
+  type        = string
+  default     = ""
+  description = "Restore the database from this snapshot ID (used on a fresh apply). Empty = new empty DB. See docs/DATABASE-RESTORE.md."
+}

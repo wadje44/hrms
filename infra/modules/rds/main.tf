@@ -47,10 +47,14 @@ resource "aws_db_instance" "this" {
   storage_type          = "gp3"
   storage_encrypted     = true
 
-  db_name  = var.db_name
-  username = var.db_username
-  password = var.db_password
-  port     = 5432
+  # When restoring from a snapshot, db_name/username are inherited from it and
+  # must not be set; the master password is reset to var.db_password so the
+  # DATABASE_URL secret stays valid.
+  snapshot_identifier = var.snapshot_identifier != "" ? var.snapshot_identifier : null
+  db_name             = var.snapshot_identifier == "" ? var.db_name : null
+  username            = var.snapshot_identifier == "" ? var.db_username : null
+  password            = var.db_password
+  port                = 5432
 
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.db.id]
@@ -62,4 +66,11 @@ resource "aws_db_instance" "this" {
   skip_final_snapshot     = var.skip_final_snapshot
 
   tags = var.tags
+
+  lifecycle {
+    # snapshot_identifier only matters at create time. Ignoring later changes
+    # means toggling it never triggers a destructive replace of a running DB —
+    # a restore is done on a fresh instance (see docs/DATABASE-RESTORE.md).
+    ignore_changes = [snapshot_identifier]
+  }
 }
