@@ -23,6 +23,12 @@ variable "engine_version" {
   type    = string
   default = "16.10"
 }
+
+variable "snapshot_identifier" {
+  type        = string
+  default     = ""
+  description = "Restore the DB from this snapshot ID at create time. Empty = fresh empty DB. See docs/DATABASE-RESTORE.md."
+}
 variable "instance_class" {
   type    = string
   default = "db.t4g.micro"
