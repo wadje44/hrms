@@ -3,18 +3,28 @@ import type { AttendanceStatus } from "../api/types";
 
 export function Spinner({ label }: { label?: string }) {
   return (
-    <div className="row" style={{ padding: 24, justifyContent: "center" }}>
+    <div
+      className="card"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 12,
+        padding: "20px 24px",
+        color: "var(--muted)",
+      }}
+    >
       <div
         style={{
-          width: 24,
-          height: 24,
+          width: 22,
+          height: 22,
           border: "3px solid var(--border)",
           borderTopColor: "var(--navy)",
           borderRadius: "50%",
           animation: "spin 0.8s linear infinite",
         }}
       />
-      {label && <span className="muted">{label}</span>}
+      {label ? <span>{label}</span> : <span>Loading…</span>}
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
@@ -22,7 +32,15 @@ export function Spinner({ label }: { label?: string }) {
 
 export function Empty({ message }: { message: string }) {
   return (
-    <div className="card" style={{ textAlign: "center", color: "var(--muted)" }}>
+    <div
+      className="card"
+      style={{
+        textAlign: "center",
+        color: "var(--muted)",
+        padding: "22px 18px",
+        borderStyle: "dashed",
+      }}
+    >
       {message}
     </div>
   );

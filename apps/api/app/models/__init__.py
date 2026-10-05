@@ -5,6 +5,7 @@ from app.models.employee import Employee
 from app.models.leave import LeaveBalance, LeaveRequest
 from app.models.payroll import HourlyRateOverride, PayrollRecord
 from app.models.settings import AppSettings
+from app.models.wfh_request import WfhRequest
 
 __all__ = [
     "Employee",
@@ -15,4 +16,5 @@ __all__ = [
     "PayrollRecord",
     "HourlyRateOverride",
     "AppSettings",
+    "WfhRequest",
 ]

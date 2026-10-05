@@ -59,9 +59,11 @@ def test_full_month_net_equals_formula():
 
 
 def test_unpaid_leave_reduces_net_proportionally():
-    # criterion 12: 2 UL days -> 2*8 fewer worked hours -> -2*8*250 = -4000
+    # criterion 12: 2 UL days -> 2*8 fewer paid hours -> -2*8*250 = -4000
     full = compute_payslip(_input())
-    with_ul = compute_payslip(_input(worked_hours=192.0, ul_days=2, present_days=24))
+    with_ul = compute_payslip(_input(worked_hours=208.0, ul_days=2, present_days=26))
+    assert with_ul["ul_deduction_hours"] == 16.0
+    assert with_ul["paid_hours"] == 192.0
     assert full["net"] - with_ul["net"] == 250.0 * 16
 
 
@@ -72,8 +74,34 @@ def test_paid_leave_counts_as_present():
     assert slip["gross"] == 52000.0
 
 
+def test_absent_days_reduce_net_proportionally():
+    full = compute_payslip(_input())
+    with_absence = compute_payslip(_input(worked_hours=160.0, present_days=20, absent_days=2))
+    assert with_absence["absent_days"] == 2
+    assert with_absence["paid_hours"] == 144.0
+    assert full["net"] - with_absence["net"] == 250.0 * 64
+
+
 def test_excess_late_marks_deduct_hours():
     # criterion 7 end-to-end: 5 late marks -> 2 billable -> -2 paid hours
     slip = compute_payslip(_input(late_marks=5))
     assert slip["late_mark_deduction_hours"] == 2.0
     assert slip["paid_hours"] == 206.0
+
+
+def test_ytd_earnings_aggregate_net_by_employee():
+    from types import SimpleNamespace
+
+    from app.services.report_service import build_ytd_earnings
+
+    rows = [
+        SimpleNamespace(employee_id="EMP001", full_name="Alice", net=1200.0),
+        SimpleNamespace(employee_id="EMP001", full_name="Alice", net=1800.0),
+        SimpleNamespace(employee_id="EMP002", full_name="Bob", net=2400.0),
+    ]
+
+    out = build_ytd_earnings(rows)
+    assert out == [
+        {"employee_id": "EMP001", "full_name": "Alice", "ytd_earnings": 3000.0},
+        {"employee_id": "EMP002", "full_name": "Bob", "ytd_earnings": 2400.0},
+    ]

@@ -35,6 +35,24 @@ export function Attendance() {
     api.get<AttendanceDay[]>(`/attendance/${empId}?date_from=${from}&date_to=${to}`).then(setRows);
   }, [empId, month]);
 
+  function exportCsv() {
+    if (!rows) return;
+    const header = ["Date", "Status", "Leave Type", "In", "Out", "Hours", "Late"];
+    const lines = rows.map((day) => {
+      const first = day.sessions[0];
+      const last = day.sessions[day.sessions.length - 1];
+      return [day.date, day.status, day.leave_type ?? "", first ? first.punch_in : "", last ? last.punch_out ?? "" : "", String(day.total_hours), day.is_late ? "Yes" : "No"];
+    });
+    const csv = [header, ...lines]
+      .map((line) => line.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `attendance-${empId}-${month}.csv`;
+    a.click();
+  }
+
   return (
     <>
       <div className="row">
@@ -53,6 +71,7 @@ export function Attendance() {
           onChange={(e) => setMonth(e.target.value)}
           style={{ width: "auto" }}
         />
+        <button className="ghost" onClick={exportCsv} disabled={!rows}>Export CSV</button>
       </div>
       {!rows ? (
         <Spinner />
